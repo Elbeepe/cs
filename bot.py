@@ -193,6 +193,50 @@ async def get_server_info(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     except requests.exceptions.RequestException as e:
         await update.message.reply_text(f'Помилка при отриманні даних: {e}')
 
+async def get_server_donat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    try:
+        # Параметри для Telegram бота
+        site_http = 'legofdef.cshost.site'
+        # Отримання даних з API
+        response = requests.get(API_URL)
+        response.raise_for_status()
+        data = response.json()
+        name_serv = data.get('server_name', 'Немає інформації про Сервер')
+        ip_address = data.get('server_address', 'Немає інформації про Сервер')
+        server_stat = data.get('server_status', 'Немає інформації про Сервер')
+        map_name = data.get('server_maps', 'Немає інформації про карту')
+        online_status = data.get('server_maxonline', 'Немає інформації про онлайн')
+        slots = data.get('server_maxslots', 'Немає інформації про онлайн')
+        icon_curl = data.get('icon', None)
+        server_messageinfo = (
+            f"🇺🇦 Cервер: {name_serv} 🇺🇦\n"
+            f"🌐 Сайт - {site_http}\n"
+            f"📝 Правила серверу - /rules /rulesadmin /rulesbanadmin"
+            f"🔹 Статус - {server_stat}\n"
+            f"🎮 IP: {ip_address}\n"
+            f"🗺 Карта: {map_name}\n"
+            f"🧍🏻‍♂️ Гравців: {online_status} / {slots}\n"
+            f"==========================\n"
+            f"🔱 Создатель - @potop4ik24\n"
+            f"〽️ Хочеш допомогти сервер з розвитком, відскануй QR-код та відправ пару гривень😱\n")      
+        # Формування повідомлення про користувачів, які онлайн більше 2
+        user_messages = []
+        # Перевірка наявності і відправка повідомлень
+        if user_messages:
+            final_message = server_messageinfo + "\n".join(user_messages)
+            if icon_curl:
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=final_message)
+            else:
+                await update.message.reply_text(final_message)
+        else:
+            if icon_curl:
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
+            else:
+                await update.message.reply_text(server_messageinfo)
+
+    except requests.exceptions.RequestException as e:
+        await update.message.reply_text(f'Помилка при отриманні даних: {e}')
+
 async def get_server_rules(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         # Параметри для Telegram бота
@@ -418,6 +462,7 @@ def main() -> None:
     application.add_handler(CommandHandler("rules", get_server_rules))
     application.add_handler(CommandHandler("rulesadmin", get_server_rulesadmin))
     application.add_handler(CommandHandler("rulesbanadmin", get_server_rulesbanadmin))
+    application.add_handler(CommandHandler("donat", get_server_donat))
     application.add_handler(CommandHandler("vip", get_server_vip))
     # Запуск бота
     application.run_polling()
