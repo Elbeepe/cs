@@ -167,6 +167,7 @@ async def get_server_info(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         server_messageinfo = (
             f"🇺🇦 Cервер: {name_serv} 🇺🇦\n"
             f"🌐 Сайт - {site_http}\n"
+            f"📝 Правила серверу - /rules /rulesadmin /rulesbanadmin"
             f"🔹 Статус - {server_stat}\n"
             f"🎮 IP: {ip_address}\n"
             f"🗺 Карта: {map_name}\n"
