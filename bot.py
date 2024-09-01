@@ -31,64 +31,6 @@ def get_db_connection():
         database=DB_DATABASE
     )
 
-# Get the last checked bid from a file or other storage
-def get_last_checked_bid():
-    try:
-        with open('new1_bid.txt', 'r') as file:
-            return int(file.read().strip())
-    except FileNotFoundError:
-        return 0
-
-# Update the last checked bid in a file
-def update_last_checked_bid(bid):
-    with open('new1_bid.txt', 'w') as file:
-        file.write(str(bid))
-
-# Check for new bans and send notifications
-async def check_for_new_bans():
-    last_bid = get_last_checked_bid()
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM amx_ban WHERE bid > %s ORDER BY bid ASC", (last_bid,))
-    new_bans = cursor.fetchall()
-    
-    for ban in new_bans:
-        player_nick = ban['player_nick']
-        admin_nick = ban['admin_nick']
-        timeban = ban['ban_length']
-        ban_reason = ban['ban_reason']
-        message = (
-            f"📝 На сервері забанений: {player_nick}\n"
-            f"〽️ Причина: {ban_reason}\n"
-            f"🧑🏻‍💻 Видав БАН: {admin_nick} на {timeban}хв")
-        try:
-            await bot.send_message(chat_id=GROUP_CHAT_ID, text=message)
-        except TelegramError as e:
-            print(f"Telegram API error: {e}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-    
-    if new_bans:
-        latest_bid = max(ban['bid'] for ban in new_bans)
-        update_last_checked_bid(latest_bid)
-    
-    cursor.close()
-    conn.close()
-
-# Main function to run the asyncio loop
-async def bans():
-    try:
-        while True:
-            await check_for_new_bans()
-            await asyncio.sleep(3)  # Check every minute
-    except KeyboardInterrupt:
-        print("Script interrupted by user")
-    except asyncio.exceptions.CancelledError:
-        print("Script cancelled")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-
 async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     for member in update.chat_member.new_chat_members:
         if not member.is_bot:
@@ -272,44 +214,38 @@ async def get_server_rules(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"1.3. Заборонено давати інформацію де знаходиться противник коли тебе воскрешають за таке порушення бан на 1 день!\n"
             f"1.4. Заборонено переходити в спектр та бігати під час голосування за карту за таке порушення бан на 1 день!\n"
             f"1.5. Заборонено ригати у мікрофон за таке порушення ГАГ на 1 день!\n\n"
-            f"📝Спілкування у грі:📝\n"
             f"2.1. Заборонено ображати гравців, виявляти національну або расову ворожнечу, що порушують чинні норми етики та моралі. ✚ Покарання: /попередження, GAG від 30 хвилин до 24 годин/. Образа батьків GAG НАЗАВЖДИ/\n"
             f"2.2. заборонено багаторазове повторення однієї й тієї фрази (flood), моніторинг. ✚ Покарання: /попередження, GAG, BAN від 5 до 60 хвилин/.\n"
             f"2.3. заборонено вживання виразів та використання імен, спрямованих на розпалювання міжнаціональної та міжконфесійної ворожнечі. ✚ Покарання: /попередження, BAN від 60 хвилин до 24 годин/.\n"
             f"2.4. заборонено плагіатників. заборонено використовувати ніки з образливим змістом, нечитані ніки, а також заборонено використовувати клан теги.✚ Покарання: /попередження, BAN від 5 до 60 хвилин/.\n"
             f"2.5. Заборонено обговорювати дії адміну під час ігрового процесу. ✚ Покарання: /попередження, BAN від 30 до 60 хвилин/.\n"
             f"2.6. Провокація гравців спрямована на дії, що порушують правила, заборонена в будь-якій формі. ✚ Покарання: /попередження, BAN від 5 до 60 хвилин/.\n\n"
-            f"📝Читерство📝:\n"
             f"3.1. заборонено використання всякого роду читів (cheats), у тому числі з метою тестування самого читання чи античитерської програми. ✚ Покарання: /BAN перманентний (НАЗАВЖДИ)/.\n"
             f"-Заборонені будь-які зміни текстур карток, у тому числі однотонні картки (які можуть надавати перевагу).\n"
             f"-Заборонено палітру кольорів 16 біт.\n\n"
-            f"📝Ігровий процес📝:\n"
             f"4.1. Заборонено злісне кемперство, ситуація, коли гравець сховався в затишному місці і чекає, поки супротивник пробіжить повз. ✚ Покарання:/попередження, стукнути/slay/кік.\n"
             f"4.2. Заборонено використання текстур, баг карт. ✚ Покарання: попередження, BAN від 5 до 30 хвилин/.\n"
             f"4.3. Заборонено закуповувати більше одного комплекту гранат і більше одного раунду, а також розкидка кількох гранат з точки респауна, покарання - бан від 5 хвилин до 6 годин\n"
             f"4.4. Заборонено брати через команду /anew - 100hp кілька разів за раунд, бан від 30 хвилин до 6 годин\n"
             f"4.5. Заборонено моніторити розташування гравців за допомогою соціальних мереж та голосових програм (Skype, TeamSpeak 3, RaidCall та ін.).\n\n"
-            f"📝Спілкування з Адміністрацією серверів📝:\n"
             f"5.1. При спілкуванні з адміністрацією сервера гравець має бути ввічливий, ввічливий і терплячий. Гравець повинен коротко, виразно та без використання сленгу розповісти про свою проблему або відповісти на задані Адміном питання.\n"
             f"5.2. Гравцю забороняється висловлюватися про його професійні здібності адміна, саркастично насміхатися з нього.\n"
             f"5.3. Забороняється просити Адміна зробити щось, що не входить до його обов язків.\n"
             f"5.4. При відповідях питання Адміна забороняється приховування інформації, брехня, введення в оману.\n"
             f"5.5. Забороняється звати Адміна без причини, створювати перешкоди та відволікати Адміна від виконання обовязків.\n\n"
+            f"〽️Примітка: Головний адміністратор Potop4ik (@potop4ik24) залишає за собою одноосібне право звільнити від покладених повноважень адміністратора без пояснення причин останньому, наділити виходячи з власних переконань гідного, що має досвід адміністрування людини повноваженнями адміністратора на свій розсуд.\n\n"
+            f"〽️Зайшовши на сервер, ви погоджуєтесь з правилами! У разі порушення правил кошти не повертаються. Повернення коштів можливе 24 години після оплати у разі дотримання правил проекту!"
         )      
-        # Формування повідомлення про користувачів, які онлайн більше 2
-        user_messages = []
         # Перевірка наявності і відправка повідомлень
+        user_messages = []
         if user_messages:
-            server_messageinfo = server_messageinfo + "\n".join(user_messages)
+            server_messageinfo = server_messageinfo
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
+                await update.message.reply_text(server_messageinfo)
             else:
                 await update.message.reply_text(server_messageinfo)
-        else:
-            if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
-            else:
-                await update.message.reply_text(server_messageinfo)
+        await update.message.reply_text(server_messageinfo)
+            
 
     except requests.exceptions.RequestException as e:
         await update.message.reply_text(f'Помилка при отриманні даних: {e}')
@@ -357,18 +293,14 @@ async def get_server_rulesadmin(update: Update, context: ContextTypes.DEFAULT_TY
         )      
         # Формування повідомлення про користувачів, які онлайн більше 2
         user_messages = []
-        # Перевірка наявності і відправка повідомлень
         if user_messages:
-            server_messageinfo = server_messageinfo + "\n".join(user_messages)
+            server_messageinfo = server_messageinfo
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
+                await update.message.reply_text(server_messageinfo)
             else:
                 await update.message.reply_text(server_messageinfo)
-        else:
-            if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
-            else:
-                await update.message.reply_text(server_messageinfo)
+        await update.message.reply_text(server_messageinfo)
+            
 
     except requests.exceptions.RequestException as e:
         await update.message.reply_text(f'Помилка при отриманні даних: {e}')
@@ -411,18 +343,14 @@ async def get_server_rulesbanadmin(update: Update, context: ContextTypes.DEFAULT
         # Формування повідомлення про користувачів, які онлайн більше 2
         user_messages = []
         # Перевірка наявності і відправка повідомлень
+        user_messages = []
         if user_messages:
-            server_messageinfo = server_messageinfo + "\n".join(user_messages)
-            if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
-            else:
-                await update.message.reply_text(server_messageinfo)
+            server_messageinfo = server_messageinfo
+        if icon_curl:
+            await update.message.reply_text(server_messageinfo)
         else:
-            if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
-            else:
-                await update.message.reply_text(server_messageinfo)
-
+            await update.message.reply_text(server_messageinfo)
+            
     except requests.exceptions.RequestException as e:
         await update.message.reply_text(f'Помилка при отриманні даних: {e}')
 
@@ -488,7 +416,7 @@ def main() -> None:
     application.add_handler(CommandHandler("admin", get_server_admin))
     application.add_handler(CommandHandler("rules", get_server_rules))
     application.add_handler(CommandHandler("rulesadmin", get_server_rulesadmin))
-    application.add_handler(CommandHandler("rulesban", get_server_rulesbanadmin))
+    application.add_handler(CommandHandler("rulesbanadmin", get_server_rulesbanadmin))
     application.add_handler(CommandHandler("vip", get_server_vip))
     # Запуск бота
     application.run_polling()
