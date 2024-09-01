@@ -20,7 +20,7 @@ DB_DATABASE = "legofdef"
 
 photo_admin = ['Adminmenu.png','admint.png','adminct.png']
 photo_vip = 'vip.png'
-photo_logo = 'logo.jpg'
+photo_logo = 'logo.png'
 
 # Initialize the database connection
 def get_db_connection():
