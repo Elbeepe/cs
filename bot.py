@@ -21,6 +21,7 @@ DB_DATABASE = "legofdef"
 photo_admin = ['Adminmenu.png','admint.png','adminct.png']
 photo_vip = 'vip.png'
 photo_logo = 'logo.png'
+photo_donat = 'donat.png'
 
 # Initialize the database connection
 def get_db_connection():
@@ -225,12 +226,12 @@ async def get_server_donat(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if user_messages:
             final_message = server_messageinfo + "\n".join(user_messages)
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=final_message)
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_donat, 'rb'), caption=final_message)
             else:
                 await update.message.reply_text(final_message)
         else:
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_donat, 'rb'), caption=server_messageinfo)
             else:
                 await update.message.reply_text(server_messageinfo)
 
