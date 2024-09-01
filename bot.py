@@ -294,18 +294,17 @@ async def get_server_rules(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"5.2. Гравцю забороняється висловлюватися про його професійні здібності адміна, саркастично насміхатися з нього.\n"
             f"5.3. Забороняється просити Адміна зробити щось, що не входить до його обов язків.\n"
             f"5.4. При відповідях питання Адміна забороняється приховування інформації, брехня, введення в оману.\n"
-            f"5.5. Забороняється звати Адміна без причини, створювати перешкоди та відволікати Адміна від виконання обовязків.\n"
-            f"5.6. Адмін не зобовязаний особисто попереджати гравця за правопорушення. Вистачає звичайного попередження у глобальний війстекст чат.\n\n"
+            f"5.5. Забороняється звати Адміна без причини, створювати перешкоди та відволікати Адміна від виконання обовязків.\n\n"
         )      
         # Формування повідомлення про користувачів, які онлайн більше 2
         user_messages = []
         # Перевірка наявності і відправка повідомлень
         if user_messages:
-            final_message = server_messageinfo + "\n".join(user_messages)
+            server_messageinfo = server_messageinfo + "\n".join(user_messages)
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=final_message)
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
             else:
-                await update.message.reply_text(final_message)
+                await update.message.reply_text(server_messageinfo)
         else:
             if icon_curl:
                 await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
@@ -360,11 +359,11 @@ async def get_server_rulesadmin(update: Update, context: ContextTypes.DEFAULT_TY
         user_messages = []
         # Перевірка наявності і відправка повідомлень
         if user_messages:
-            final_message = server_messageinfo + "\n".join(user_messages)
+            server_messageinfo = server_messageinfo + "\n".join(user_messages)
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=final_message)
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
             else:
-                await update.message.reply_text(final_message)
+                await update.message.reply_text(server_messageinfo)
         else:
             if icon_curl:
                 await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
@@ -413,11 +412,11 @@ async def get_server_rulesbanadmin(update: Update, context: ContextTypes.DEFAULT
         user_messages = []
         # Перевірка наявності і відправка повідомлень
         if user_messages:
-            final_message = server_messageinfo + "\n".join(user_messages)
+            server_messageinfo = server_messageinfo + "\n".join(user_messages)
             if icon_curl:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=final_message)
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
             else:
-                await update.message.reply_text(final_message)
+                await update.message.reply_text(server_messageinfo)
         else:
             if icon_curl:
                 await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(photo_logo, 'rb'), caption=server_messageinfo)
